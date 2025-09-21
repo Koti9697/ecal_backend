@@ -9,8 +9,8 @@ djangorestframework==3.15.1
 djangorestframework-simplejwt==5.3.1
 gunicorn==22.0.0
 # --- THIS IS THE FIX ---
-# Using the newer, more compatible PostgreSQL driver
-psycopg[binary]==3.1.18
+# Using the stable and compatible psycopg2 driver
+psycopg2-binary==2.9.9
 sqlparse==0.5.0
 tzdata==2024.1
 whitenoise==6.7.0
