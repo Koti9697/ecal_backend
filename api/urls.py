@@ -19,13 +19,12 @@ router.register(r'groups', GroupViewSet, basename='group')
 router.register(r'privileges', PrivilegeViewSet, basename='privilege')
 router.register(r'system-settings', SystemSettingsViewSet, basename='systemsetting')
 router.register(r'my-profile', MyProfileViewSet, basename='my-profile')
-# --- NEW: Register the Reporting endpoint ---
 router.register(r'reports/records', RecordReportViewSet, basename='record-report')
 
 
 # The final URL patterns for our API
 urlpatterns = [
-    path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/', MyTokenObainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
     path('', include(router.urls)),
