@@ -24,7 +24,8 @@ router.register(r'reports/records', RecordReportViewSet, basename='record-report
 
 # The final URL patterns for our API
 urlpatterns = [
-    path('token/', MyTokenObainPairView.as_view(), name='token_obtain_pair'),
+    # --- THIS IS THE FIX ---
+    path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
     path('', include(router.urls)),
