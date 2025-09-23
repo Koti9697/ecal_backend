@@ -24,7 +24,7 @@ router.register(r'reports/records', RecordReportViewSet, basename='record-report
 
 # The final URL patterns for our API
 urlpatterns = [
-    # --- THIS IS THE FIX ---
+    # --- THIS IS THE FIX: The '/api/' prefix is removed ---
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
