@@ -3,15 +3,20 @@ import os
 import dj_database_url
 from pathlib import Path
 from datetime import timedelta
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 # --- IMPORTANT: Change this in production! ---
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-development')
 # --- IMPORTANT: Set DEBUG to False in production! ---
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = []
+
+# --- FIX: Added the Vercel URL directly to ALLOWED_HOSTS for robustness ---
+ALLOWED_HOSTS = ['ecal-frontend.vercel.app'] 
+
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -87,18 +92,23 @@ REST_FRAMEWORK = {
     ),
 }
 # --- CORS Configuration for Frontend ---
+# --- FIX: Added your Vercel frontend URL here ---
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://ecal-frontend.vercel.app", 
 ]
 CORS_ALLOW_CREDENTIALS = True
+# --- FIX: Added your Vercel frontend URL here as well ---
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
+    "https://ecal-frontend.vercel.app",
 ]
-# Allow Vercel frontend to connect
+# Allow Vercel frontend to connect dynamically (good practice, but explicit is better)
 VERCEL_URL = os.environ.get('VERCEL_URL')
-if VERCEL_URL:
+if VERCEL_URL and f"https://{VERCEL_URL}" not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS.append(f"https://{VERCEL_URL}")
     CSRF_TRUSTED_ORIGINS.append(f"https://{VERCEL_URL}")
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
