@@ -68,7 +68,8 @@ class SystemSettings(models.Model):
         verbose_name_plural = "System Settings"
 
 class Template(models.Model):
-    template_id = models.CharField(max_length=255, unique=True)
+    # --- THIS IS THE FIX: Removed unique=True ---
+    template_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     major_version = models.PositiveIntegerField(default=1)
     minor_version = models.PositiveIntegerField(default=0)
@@ -152,8 +153,6 @@ class GroupProfile(models.Model):
 
 @receiver(post_save, sender=Group)
 def create_or_update_group_profile(sender, instance, **kwargs):
-    # --- THIS IS THE FIX ---
-    # This ensures that a GroupProfile is always created for a Group.
     GroupProfile.objects.get_or_create(group=instance)
 
 class UserProfile(models.Model):

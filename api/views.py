@@ -92,33 +92,6 @@ class UserViewSet(viewsets.ModelViewSet):
         'partial_update': 'MANAGE_USERS_AND_ROLES', 'list': 'MANAGE_USERS_AND_ROLES',
         'retrieve': 'MANAGE_USERS_AND_ROLES', 'set_status': 'MANAGE_USERS_AND_ROLES',
     }
-    
-    # --- THIS IS THE DEBUGGING CODE ---
-    def list(self, request, *args, **kwargs):
-        print("--- DEBUG: Entering UserViewSet list method ---")
-        user = request.user
-        print(f"--- DEBUG: Requesting user: {user.username} ---")
-        print(f"--- DEBUG: Is superuser? {user.is_superuser} ---")
-        
-        user_groups = user.groups.all()
-        print(f"--- DEBUG: User groups: {[group.name for group in user_groups]} ---")
-
-        if user_groups.exists():
-            for group in user_groups:
-                try:
-                    # Check if the profile exists before trying to access it
-                    if hasattr(group, 'profile'):
-                        privileges = group.profile.privileges.all()
-                        print(f"--- DEBUG: Privileges for group '{group.name}': {[p.name for p in privileges]} ---")
-                    else:
-                        print(f"--- DEBUG: Group '{group.name}' does not have a profile attribute. ---")
-                except GroupProfile.DoesNotExist:
-                    print(f"--- DEBUG: Group '{group.name}' does not have a GroupProfile. ---")
-        
-        print("--- DEBUG: Now calling original list method... ---")
-        return super().list(request, *args, **kwargs)
-    # ------------------------------------
-
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']: return serializers.UserReadOnlySerializer
         return serializers.UserWriteSerializer
@@ -368,7 +341,10 @@ class TemplateViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         if not request.user.check_password(serializer.validated_data['password']):
             raise PermissionDenied("Incorrect password.")
+        
+        # --- THIS IS THE FIX ---
         new_template = Template.objects.create(
+            template_id=original_template.template_id,
             name=original_template.name,
             major_version=original_template.major_version,
             minor_version=original_template.minor_version + 1,
@@ -377,6 +353,7 @@ class TemplateViewSet(viewsets.ModelViewSet):
             status='DRAFT',
             parent_template=original_template
         )
+        
         reason = serializer.validated_data['reason']
         _create_audit_log(request.user, "Template Revision", new_template, f"Template revised from v{original_template.version} to v{new_template.version}", reason)
         return Response(serializers.TemplateDetailSerializer(new_template).data, status=status.HTTP_201_CREATED)
