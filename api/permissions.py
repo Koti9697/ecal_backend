@@ -12,10 +12,10 @@ class HasPrivilege(BasePermission):
             return False
 
         # --- THIS IS THE FIX ---
-        # The superuser check has been re-instated. Now, ALL superusers,
-        # will have the explicit privilege to perform an action.
+        # This check ensures that any user marked as a "superuser" is automatically
+        # granted permission for any action, which is the expected behavior for an admin.
         if request.user.is_superuser:
-             return True
+            return True
 
         required_privileges_map = getattr(view, 'required_privileges', {})
         required_privilege_or_list = required_privileges_map.get(view.action)
