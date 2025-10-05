@@ -10,7 +10,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-deve
 # --- IMPORTANT: Set DEBUG to False in production! ---
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# --- FIX: Added the Vercel URL directly to ALLOWED_HOSTS for robustness ---
+# --- Add localhost for Docker development ---
 ALLOWED_HOSTS = ['ecal-frontend.vercel.app', 'localhost', '127.0.0.1'] 
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -57,7 +57,7 @@ TEMPLATES = [
     },
 ]
 WSGI_APPLICATION = 'caljar_project.wsgi.application'
-# --- Production Database Configuration ---
+# --- Database Configuration ---
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -92,7 +92,6 @@ REST_FRAMEWORK = {
     ),
 }
 # --- CORS Configuration for Frontend ---
-# --- FIX: Added your Vercel frontend URL here ---
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost",

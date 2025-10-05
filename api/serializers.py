@@ -292,13 +292,11 @@ class UserPasswordChangeSerializer(serializers.Serializer):
         validator = GxPPasswordValidator(user=user)
         validator(data['new_password'])
 
-        # --- THIS IS THE ENHANCEMENT ---
         settings, _ = SystemSettings.objects.get_or_create(pk=1)
         if settings.password_history_count > 0:
             recent_passwords = user.password_history.all()[:settings.password_history_count]
             for record in recent_passwords:
                 if check_password(data['new_password'], record.password_hash):
                     raise ValidationError("This password has been used recently and cannot be reused.")
-        # --- END OF ENHANCEMENT ---
 
         return data
