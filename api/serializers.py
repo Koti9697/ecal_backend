@@ -86,29 +86,45 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         username = attrs.get('username')
-        try:
-            user = User.objects.get(username=username)
-            profile = user.profile
-        except (User.DoesNotExist, UserProfile.DoesNotExist):
+        user = User.objects.filter(username=username).first()
+
+        # If user doesn't exist, fail early with a clear 401 error
+        if not user:
             raise AuthenticationFailed('No active account found with the given credentials', 'no_active_account')
 
+        # Safely get or create the profile and settings to prevent crashes
+        profile, _ = UserProfile.objects.get_or_create(user=user)
         settings, _ = SystemSettings.objects.get_or_create(pk=1)
+
+        # Check for lockout before attempting password validation
         if profile.lockout_until and profile.lockout_until > timezone.now():
             raise AuthenticationFailed(f"Account is locked. Try again later.", "account_locked")
+
         try:
+            # This is the main password check. It will raise AuthenticationFailed if the password is wrong.
             data = super().validate(attrs)
         except AuthenticationFailed as e:
+            # This block now only runs for INCORRECT passwords
             profile.failed_login_attempts += 1
             if profile.failed_login_attempts >= settings.password_lockout_attempts:
                 profile.lockout_until = timezone.now() + timedelta(minutes=settings.password_lockout_duration)
             profile.save()
-            raise e
+            # Re-raise the original "No active account..." error for security
+            raise AuthenticationFailed('No active account found with the given credentials', 'no_active_account') from e
+
+        # ---- If we reach here, the password was CORRECT ----
+
+        # Check for password expiry
         expiry_date = profile.password_last_changed + timedelta(days=settings.password_expiry_days)
         if timezone.now() > expiry_date:
             raise AuthenticationFailed("Your password has expired. Please contact an administrator to reset it.", "password_expired")
+        
+        # Reset lockout attempts on a successful login
         profile.failed_login_attempts = 0
         profile.lockout_until = None
         profile.save()
+
+        # Add the user's data to the token and return
         refresh = self.get_token(self.user)
         data['refresh'] = str(refresh)
         data['access'] = str(refresh.access_token)

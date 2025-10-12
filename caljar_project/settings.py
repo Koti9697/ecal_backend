@@ -32,7 +32,7 @@ INSTALLED_APPS = [
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Add WhiteNoise
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -98,12 +98,10 @@ CORS_ALLOWED_ORIGINS = [
     "https://ecal-frontend.vercel.app", 
 ]
 CORS_ALLOW_CREDENTIALS = True
-# --- FIX: Added your Vercel frontend URL here as well ---
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "https://ecal-frontend.vercel.app",
 ]
-# Allow Vercel frontend to connect dynamically (good practice, but explicit is better)
 VERCEL_URL = os.environ.get('VERCEL_URL')
 if VERCEL_URL and f"https://{VERCEL_URL}" not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS.append(f"https://{VERCEL_URL}")
